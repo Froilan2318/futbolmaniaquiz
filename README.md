@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FutbolQuizManía Pro – Real</title>
+<style>
+  body {
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+    background: #f5f7fa;
+    color: #333;
+  }
+  header {
+    background: #2196F3;
+    color: white;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+  header h1 { margin: 0; font-size: 2.5em; }
+  header p { margin: 5px 0 0 0; }
+  .container {
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 10px;
+  }
+  .cards {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .quiz-card {
+    background: #ffffff;
+    border: 2px solid #90caf9;
+    border-radius: 10px;
+    margin: 10px;
+    padding: 20px;
+    width: 200px;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .quiz-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+  }
+  #difficulty, #quiz, #ranking {
+    display: none;
+  }
+  .question {
+    margin-bottom: 20px;
+  }
+  .option {
+    background: #eceff1;
+    padding: 10px;
+    margin: 8px 0;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+  }
+  .option:hover {
+    background: #cfd8dc;
+    transform: scale(1.02);
+  }
+  .correct { background-color: #66bb6a !important; color: white; }
+  .wrong { background-color: #ef5350 !important; color: white; }
+  button {
+    background: #1976d2;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 20px;
+    cursor: pointer;
+    margin: 10px 5px;
+    transition: background 0.2s, transform 0.15s;
+  }
+  button:hover {
+    background: #115293;
+    transform: scale(1.03);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+  th, td {
+    border: 1px solid #90caf9;
+    padding: 8px;
+    text-align: center;
+  }
+  th {
+    background: #e3f2fd;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>⚽ FutbolQuizManía Pro</h1>
+  <p>Quiz de fútbol – demuestra tus conocimientos</p>
+</header>
+
+<div class="container" id="main">
+  <h2>Selecciona una categoría</h2>
+  <div class="cards">
+    <div class="quiz-card" onclick="selectDifficulty('champions')">🏆 Champions League</div>
+    <div class="quiz-card" onclick="selectDifficulty('libertadores')">🇱🇷 Copa Libertadores</div>
+    <div class="quiz-card" onclick="selectDifficulty('mundial')">🌍 Mundial</div>
+    <div class="quiz-card" onclick="selectDifficulty('liga')">🇪🇸 Liga Española</div>
+    <div class="quiz-card" onclick="selectDifficulty('premier')">🏴 Premier League</div>
+    <div class="quiz-card" onclick="selectDifficulty('seriea')">🇮🇹 Serie A</div>
+    <div class="quiz-card" onclick="selectDifficulty('europa')">🌐 Europa League</div>
+    <div class="quiz-card" onclick="selectDifficulty('jugadores')">👟 Jugadores Famosos</div>
+  </div>
+</div>
+
+<div class="container" id="difficulty">
+  <h2>Elige la dificultad</h2>
+  <button onclick="startQuiz('easy')">Fácil</button>
+  <button onclick="startQuiz('medium')">Medio</button>
+  <button onclick="startQuiz('hard')">Difícil</button>
+  <button onclick="backToMain()">Volver</button>
+</div>
+
+<div class="container" id="quiz">
+  <h2 id="quiz-title"></h2>
+  <div id="questions"></div>
+  <button onclick="finishQuiz()">Finalizar</button>
+  <div id="result"></div>
+  <button onclick="viewRanking()">Ver Tabla de Posiciones</button>
+</div>
+
+<div class="container" id="ranking">
+  <h2>🏅 Top 10 Jugadores</h2>
+  <table id="rankingTable">
+    <tr><th>Usuario</th><th>Puntos</th><th>Rango</th></tr>
+  </table>
+  <button onclick="backToMain()">Volver al menú</button>
+</div>
+
+
+<script>
+// —– Datos reales de ejemplo —–
+// Ubica aquí un conjunto de preguntas reales por categoría y dificultad.
+// Para reducir volumen del ejemplo, incluyo ~5 preguntas por nivel.
+// Puedes añadir muchas más siguiendo el mismo formato.
+
+const quizzes = {
+  champions: {
+    easy: [
+      { q: "¿Qué equipo ganó la Champions League 2022‑2023?", options: ["Manchester City","Inter de Milán","Real Madrid","Bayern Múnich"], answer: 0 },
+      { q: "¿Cuántas veces ganó el Real Madrid la Champions hasta 2023?", options: ["12","14","13","11"], answer: 1 },
+      { q: "¿Qué jugador tiene el récord de más goles en una edición de Champions (2013‑14)?", options: ["Cristiano Ronaldo","Messi","Lewandowski","Kane"], answer: 0 },
+      { q: "¿En qué país se jugó la final de Champions 2018‑2019?", options: ["España","Inglaterra","Francia","Portugal"], answer: 2 },
+      { q: "¿Qué club ganó la primera edición de la Champions (1955)?", options: ["Real Madrid","Milan","Benfica","Manchester United"], answer: 0 }
+    ],
+    medium: [
+      { q: "¿Qué club eliminó al PSG en octavos de final 2020‑21?", options: ["Bayern","Manchester City","Real Madrid","Chelsea"], answer: 3 },
+      { q: "¿Cuántas Champions consecutivas ganó Real Madrid entre 2016–2018?", options: ["2","3","4","1"], answer: 1 },
+      { q: "¿Quién fue Bota de Oro en Champions 2015‑16 con 16 goles?", options: ["Higuaín","Suárez","Cavani","Lewandowski"], answer: 3 },
+      { q: "¿Qué equipo tiene más finales perdidas de Champions sin ganarla?", options: ["Juventus","Monaco","Valencia","Leverkusen"], answer: 0 },
+      { q: "¿Cuántos goles convirtió Gareth Bale en la final de 2018?", options: ["1","2","3","0"], answer: 0 }
+    ],
+    hard: [
+      { q: "¿Qué club eliminó al Ajax en semifinales con 2 goles de Ronaldo 2018‑19?", options: ["Tottenham","Juventus","Real Madrid","Manchester City"], answer: 2 },
+      { q: "¿Quién fue el primer jugador africano en marcar en una final de Champions?", options: ["Samuel Eto’o","Didier Drogba","George Weah","Yaya Touré"], answer: 1 },
+      { q: "¿Qué arquero tiene más partidos invicto consecutivos en fase de grupos (2015‑19)?", options: ["Neuer","De Gea","Ter Stegen","Buffon"], answer: 0 },
+      { q: "¿Qué club ganó la Champions 1999 sin ganar en el partido de vuelta final?", options: ["Manchester United","Bayern","Juventus","AC Milan"], answer: 0 },
+      { q: "¿Qué jugador anotó un hat-trick en semifinales 2014‑15 para Bayern?", options: ["Lewandowski","Ribéry","Müller","Robben"], answer: 2 }
+    ]
+  },
+  mundial: {
+    easy: [
+      { q: "¿Qué selección ganó el Mundial 2018?", options: ["Croacia","Francia","Brasil","Alemania"], answer: 1 },
+      { q: "¿Qué país ganó el primer Mundial en 1930?", options: ["Uruguay","Argentina","Brasil","Italia"], answer: 0 },
+      { q: "¿Qué país ha ganado más Copas Mundiales hasta 2023?", options: ["Alemania","Italia","Brasil","Argentina"], answer: 2 },
+      { q: "¿Cuál fue sede del Mundial 2014?", options: ["Brasil","Argentina","México","Sudáfrica"], answer: 0 },
+      { q: "¿Qué país sede el Mundial 2022?", options: ["Qatar","Arabia Saudí","Emiratos","Egipto"], answer: 0 }
+    ],
+    medium: [
+      { q: "Máximo goleador histórico en mundiales (hasta 2022)", options: ["Pelé","Müller","Ronaldo Nazário","Klose"], answer: 3 },
+      { q: "¿Qué país sorprendió llegando a semifinales en 1994 siendo debutante mundialista?", options: ["Bulgaria","Chile","Irak","Ecuador"], answer: 0 },
+      { q: "¿Quién ganó el Balón de Oro en el Mundial 2014?", options: ["Messi","Ronaldo","Neuer","Suárez"], answer: 2 },
+      { q: "¿Qué mundial tuvo más goles por partido promedio hasta 2022?", options: ["1970","1998","2014","2006"], answer: 2 },
+      { q: "¿Qué selección ganó su primer Mundial en 2010?", options: ["España","Países Bajos","Italia","Francia"], answer: 0 }
+    ],
+    hard: [
+      { q: "¿Qué selección fue la primera en ganar un Mundial fuera de su continente (2002)?", options: ["Brasil","Alemania","España","Argentina"], answer: 0 },
+      { q: "¿Quién fue el capitán de Italia en el Mundial 2006?", options: ["Maldini","Cannavaro","Totti","Del Piero"], answer: 1 },
+      { q: "¿Cuántos mundiales consecutivos ganó Italia en los 1930‑30/34/38?", options: ["2","3","4","1"], answer: 1 },
+      { q: "¿Qué portero logró 3 penaltys atajados en semifinales de 2002?", options: ["Casillas","Oliver Khan","Buffon","Taffarel"], answer: 1 },
+      { q: "¿Qué país sufrió la mayor goleada en semifinales (7-1) en 2014?", options: ["Brasil","Alemania","Francia","Uruguay"], answer: 0 }
+    ]
+  },
+  liga: {
+    easy: [
+      { q: "¿Qué club tiene más títulos de LaLiga hasta 2023?", options: ["Real Madrid","Barcelona","Atlético","Valencia"], answer: 0 },
+      { q: "¿Qué equipo descendió en la temporada 2021‑22?", options: ["Levante","Getafe","Almería","Granada"], answer: 2 },
+      { q: "¿Quién ganó el Pichichi 2022‑23?", options: ["Benzema","Suárez","Girona FC","Lewandowski"], answer: 3 },
+      { q: "¿Qué club es conocido como ‘Los Blancos’?", options: ["Real Madrid","Valencia","Atlético","Sevilla"], answer: 0 },
+      { q: "¿Qué club ganó LaLiga 2020‑21?", options: ["Atlético","Real Madrid","Barcelona","Sevilla"], answer: 0 }
+    ],
+    medium: [
+      { q: "Máximo goleador histórico de LaLiga (hasta 2023)", options: ["Messi","Raúl","Cristiano","Telmo Zarra"], answer: 3 },
+      { q: "¿Qué club tiene más Copas del Rey históricas hasta 2022?", options: ["Barcelona","Sevilla","Real Madrid","Valencia"], answer: 0 },
+      { q: "¿En qué año fue fundado el FC Barcelona?", options: ["1899","1902","1888","1910"], answer: 0 },
+      { q: "¿Qué equipo descendió más veces en la historia de LaLiga?", options: ["Espanyol","Málaga","Granada","Real Betis"], answer: 0 },
+      { q: "¿Qué jugador tiene más asistencias en una temporada 2021‑22?", options: ["Messi","Modrić","Suárez","Coutinho"], answer: 0 }
+    ],
+    hard: [
+      { q: "¿Qué club ganó LaLiga 1995‑96 invicto en casa y fuera?", options: ["Atletico","Barcelona","Real Madrid","Valencia"], answer: 2 },
+      { q: "¿Qué técnico dirigió más partidos consecutivos en LaLiga (2003‑2015)?", options: ["Luis Enrique","Valverde","Del Bosque","Unai Emery"], answer: 1 },
+      { q: "¿Qué club logró 100 puntos en una temporada en Segunda División 1970‑71?", options: ["Racing","Cádiz","Málaga","Real Betis"], answer: 0 },
+      { q: "¿Quién fue el primer jugador extranjero en ganar el Pichichi?", options: ["Hugo Sánchez","Romário","Kluivert","Lewandowski"], answer: 0 },
+      { q: "¿Qué equipo logró ganar LaLiga con menos goles en una temporada (2002‑03)?", options: ["Real Madrid","Mallorca","Depor","Valencia"], answer: 0 }
+    ]
+  }
+  // Puedes agregar "premier", "seriea", "europa", "libertadores", "jugadores" igual
+};
+
+let currentQuiz = null;
+let currentDifficulty = null;
+let currentQuestions = [];
+let score = 0;
+
+// —– navegación —–
+function selectDifficulty(name) {
+  currentQuiz = name;
+  document.getElementById('main').style.display = 'none';
+  document.getElementById('difficulty').style.display = 'block';
+}
+function backToMain() {
+  document.getElementById('difficulty').style.display = 'none';
+  document.getElementById('ranking').style.display = 'none';
+  document.getElementById('main').style.display = 'block';
+}
+
+// —– seleccion aleatoria —–
+function generateRandomQuestions(quizObj, diff) {
+  let arr = quizObj[diff];
+  let shuffled = arr.sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, 10);
+}
+
+// —– iniciar quiz —–
+function startQuiz(diff) {
+  currentDifficulty = diff;
+  score = 0;
+  document.getElementById('difficulty').style.display = 'none';
+  document.getElementById('quiz').style.display = 'block';
+  currentQuestions = generateRandomQuestions(quizzes[currentQuiz], currentDifficulty);
+  renderQuestions();
+}
+
+function renderQuestions() {
+  document.getElementById('quiz-title').innerText = `${capitalize(currentQuiz)} – ${capitalize(currentDifficulty)}`;
+  const qDiv = document.getElementById('questions');
+  qDiv.innerHTML = '';
+  currentQuestions.forEach((q, i) => {
+    const div = document.createElement('div');
+    div.classList.add('question');
+    div.innerHTML = `<h3>${q.q}</h3>`;
+    q.options.forEach((opt, idx) => {
+      const optDiv = document.createElement('div');
+      optDiv.classList.add('option');
+      optDiv.innerText = opt;
+      optDiv.onclick = () => {
+        if (optDiv.classList.contains('correct') || optDiv.classList.contains('wrong')) return;
+        if (idx === q.answer) {
+          optDiv.classList.add('correct');
+          score += 10 + getDifficultyBonus(currentDifficulty);
+        } else {
+          optDiv.classList.add('wrong');
+        }
+      };
+      div.appendChild(optDiv);
+    });
+    qDiv.appendChild(div);
+  });
+}
+
+// —– bonus por dificultad —–
+function getDifficultyBonus(d) {
+  if (d === 'medium') return 2;
+  if (d === 'hard') return 5;
+  return 0;
+}
+
+// —– rangos —–
+function calculateRank(p) {
+  if (p < 50) return { name: "Hierro", color: "#616161" };
+  if (p < 70) return { name: "Cobre", color: "#a1887f" };
+  if (p < 90) return { name: "Plata", color: "#b0bec5" };
+  if (p < 110) return { name: "Oro", color: "#ffd600" };
+  if (p < 130) return { name: "Esmeralda", color: "#4caf50" };
+  if (p < 150) return { name: "Rubí", color: "#e53935" };
+  return { name: "Diamante", color: "#00bcd4" };
+}
+
+// —– finalizar —–
+function finishQuiz() {
+  let name = prompt("Ingresa tu nombre:");
+  if (!name) name = "Anónimo";
+  let rank = calculateRank(score);
+  document.getElementById('result').innerHTML = `<h2>Puntuación: ${score}</h2><h3>Rango: <span style="color:${rank.color}">${rank.name}</span></h3>`;
+  saveScore(name, score, rank.name);
+}
+
+// —– ranking via localStorage —–
+function saveScore(user, pts, rang) {
+  let arr = JSON.parse(localStorage.getItem('fq_scores') || '[]');
+  arr.push({ user: user, score: pts, rank: rang });
+  arr.sort((a, b) => b.score - a.score);
+  if (arr.length > 100) arr = arr.slice(0, 100);
+  localStorage.setItem('fq_scores', JSON.stringify(arr));
+}
+
+function viewRanking() {
+  document.getElementById('quiz').style.display = 'none';
+  document.getElementById('ranking').style.display = 'block';
+  let arr = JSON.parse(localStorage.getItem('fq_scores') || '[]');
+  const table = document.getElementById('rankingTable');
+  table.innerHTML = '<tr><th>Usuario</th><th>Puntos</th><th>Rango</th></tr>';
+  arr.slice(0, 10).forEach(s => {
+    let r = table.insertRow();
+    r.insertCell(0).innerText = s.user;
+    r.insertCell(1).innerText = s.score;
+    r.insertCell(2).innerText = s.rank;
+  });
+}
+
+// —– utilidades —–
+function capitalize(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+</script>
+
+</body>
+</html>
